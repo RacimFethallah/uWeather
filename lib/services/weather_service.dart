@@ -14,19 +14,23 @@ class WeatherService {
   WeatherService({required this.apiKey});
 
   //method to get weather
-  Future<Weather> getWeather(String city) async {
-    final response = await http
-        .get(Uri.parse('$BASE_URL?q=$city&appid=$apiKey&units=metric'));
-
-    if (response.statusCode == 200) {
-      return Weather.fromJson(jsonDecode(response.body));
-    } else {
-      throw Exception('Failed to load weather');
+  Future<Weather> getWeather(double lat, double lon) async {
+    try {
+      //final response = await http.get(Uri.parse('$BASE_URL?q=$city&appid=$apiKey&units=metric'));
+      final response = await http.get(
+          Uri.parse('$BASE_URL?lat=$lat&lon=$lon&appid=$apiKey&units=metric'));
+      if (response.statusCode == 200) {
+        return Weather.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Failed to load weather');
+      }
+    } catch (e) {
+      throw Exception('Failed to load weather: $e');
     }
   }
 
   //method to get current city
-  Future<String> getCurrentCity() async {
+  Future<Map<String, dynamic>> getCurrentCity() async {
     // request location from user
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
@@ -43,7 +47,15 @@ class WeatherService {
 
     //extract city name from placemark
     String? city = placemarks[0].locality;
+    double latitude = position.latitude;
+    double longitude = position.longitude;
 
-    return city ?? '';
+    Map<String, dynamic> cityData = {
+      'city': city,
+      'latitude': latitude,
+      'longitude': longitude,
+    };
+
+    return cityData;
   }
 }

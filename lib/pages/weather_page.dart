@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "dart:async";
 
 import "../models/weather_model.dart";
 import "../services/weather_service.dart";
@@ -11,32 +12,48 @@ class WeatherPage extends StatefulWidget {
 }
 
 class _WeatherPageState extends State<WeatherPage> {
-  //api key
-
+  // API key
   final _weatherService =
-      WeatherService(apiKey: '625326cc30ff877f093016f04d5379cb');
+      WeatherService(apiKey: '253682c0bd759acfb4255d4aa08c3dd7');
   Weather? _weather;
 
-  //fetch weather data
-
+  // Fetch weather data
   _fetchWeather() async {
-    //get current city
+    // Get current city
     final city = await _weatherService.getCurrentCity();
 
-    //get weather for that city
-    final weather = await _weatherService.getWeather(city);
+    // Get weather for that city
+    final weather = await _weatherService.getWeather(
+      city['latitude'] as double,
+      city['longitude'] as double,
+    );
     setState(() {
-      _weather = weather;
+      _weather = Weather(
+        city: city['city'],
+        temperature: weather.temperature,
+        mainCondition: weather.mainCondition,
+      );
     });
   }
 
-  //weather animations
+  // Timer to refresh weather periodically
+  Timer? _weatherTimer;
 
-  //initial state
   @override
   void initState() {
     super.initState();
     _fetchWeather();
+
+    // Set up timer to refresh weather every 30 minutes (1800 seconds)
+    _weatherTimer = Timer.periodic(const Duration(seconds: 1800), (_) {
+      _fetchWeather();
+    });
+  }
+
+  @override
+  void dispose() {
+    _weatherTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -46,12 +63,32 @@ class _WeatherPageState extends State<WeatherPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            //city name
-            Text(_weather?.city ?? 'Loading...'),
-
-            //temperature
+            // City name
             Text(
-                '${_weather?.temperature.round().toString()}C'),
+              _weather?.city ?? 'Loading...',
+              style: const TextStyle(
+                fontSize: 24.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            // Temperature
+            Text(
+              '${_weather?.temperature.round() ?? ''}°C',
+              style: const TextStyle(
+                fontSize: 36.0,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+
+            // Weather condition
+            Text(
+              _weather?.mainCondition ?? 'Loading...',
+              style: const TextStyle(
+                fontSize: 18.0,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
           ],
         ),
       ),
