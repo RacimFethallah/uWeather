@@ -15,6 +15,7 @@ class _WeatherPageState extends State<WeatherPage> {
   // API key
   final _weatherService = WeatherService();
   Weather? _weather;
+  String? weatherDescription;
 
   // Fetch weather data
   _fetchWeather() async {
@@ -26,6 +27,8 @@ class _WeatherPageState extends State<WeatherPage> {
       city['latitude'] as double,
       city['longitude'] as double,
     );
+
+    weatherDescription = _weatherService.getWeatherDescription(weather.mainCondition);
     setState(() {
       _weather = Weather(
         city: city['city'],
@@ -82,7 +85,7 @@ class _WeatherPageState extends State<WeatherPage> {
 
             // Weather condition
             Text(
-              _weather?.mainCondition ?? 'Loading...',
+              weatherDescription?.toString() ?? 'Loading...',
               style: const TextStyle(
                 fontSize: 18.0,
                 fontStyle: FontStyle.italic,
