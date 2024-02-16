@@ -5,20 +5,21 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/weather_model.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class WeatherService {
-  static const BASE_URL = 'https://api.openweathermap.org/data/2.5/weather';
+  static const baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
 
-  final String apiKey;
+  final String apiKey = dotenv.env['WEATHER_API']!;
 
-  WeatherService({required this.apiKey});
+  WeatherService();
 
   //method to get weather
   Future<Weather> getWeather(double lat, double lon) async {
     try {
       //final response = await http.get(Uri.parse('$BASE_URL?q=$city&appid=$apiKey&units=metric'));
       final response = await http.get(
-          Uri.parse('$BASE_URL?lat=$lat&lon=$lon&appid=$apiKey&units=metric'));
+          Uri.parse('$baseUrl?lat=$lat&lon=$lon&appid=$apiKey&units=metric'));
       if (response.statusCode == 200) {
         return Weather.fromJson(jsonDecode(response.body));
       } else {
