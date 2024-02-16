@@ -10,13 +10,17 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 class WeatherService {
   static const baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
 
-  final String apiKey = dotenv.env['WEATHER_API']!;
+  final String? apiKey = dotenv.env['WEATHER_API'];
 
   WeatherService();
 
   //method to get weather
   Future<Weather> getWeather(double lat, double lon) async {
     try {
+      // Check if API key is available
+      if (apiKey == null || apiKey!.isEmpty) {
+        throw Exception("API key not found in environment variables");
+      }
       //final response = await http.get(Uri.parse('$BASE_URL?q=$city&appid=$apiKey&units=metric'));
       final response = await http.get(
           Uri.parse('$baseUrl?lat=$lat&lon=$lon&appid=$apiKey&units=metric'));
