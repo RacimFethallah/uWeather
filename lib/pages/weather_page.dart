@@ -10,18 +10,22 @@ import "../services/weather_service.dart";
 import "loadingScreen.dart";
 
 class WeatherPage extends StatefulWidget {
-  const WeatherPage({Key? key}) : super(key: key);
+  final Function(ThemeMode) onThemeModeChanged;
+  const WeatherPage({Key? key, required this.onThemeModeChanged})
+      : super(key: key);
 
   @override
   State<WeatherPage> createState() => _WeatherPageState();
 }
 
 class _WeatherPageState extends State<WeatherPage> {
+  bool isMoonIcon = true;
   final _weatherService = WeatherService();
   late Weather _weather;
   String? weatherDescription;
   late Timer? _weatherTimer;
   late Future<Weather> _weatherFuture;
+  ThemeMode _currentThemeMode = ThemeMode.system;
 
   @override
   void initState() {
@@ -65,6 +69,7 @@ class _WeatherPageState extends State<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
+    Brightness brightness = Theme.of(context).brightness;
     return FutureBuilder<Weather>(
       future: _weatherFuture,
       builder: (context, snapshot) {
@@ -80,113 +85,149 @@ class _WeatherPageState extends State<WeatherPage> {
             ),
           );
         } else {
+          final ThemeData theme = Theme.of(context);
           // Otherwise, show the WeatherPage
           return Scaffold(
+            backgroundColor: theme.primaryColor,
             body: SingleChildScrollView(
-              child: Container(
-                // width: double.infinity,
-                color: const Color.fromARGB(255, 255, 251, 235),
-                // color: const Color(0x00FBBAA1),
-                child: Column(
-                  children: [
-                    Center(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding:
-                                const EdgeInsets.only(top: 50.0, bottom: 20.0),
-                            child: Stack(
-                              children: [
-                                const Align(
-                                  child: Text(
-                                    "uWeather",
-                                    style: TextStyle(
-                                        fontSize: 20.0,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black),
-                                  ),
-                                ),
-                                Positioned(
-                                  right: 20,
-                                  child: SvgPicture.asset(
-                                    "assets/moon.svg",
-                                    height: 30.0,
-                                    width: 30.0,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 30),
-                          // City name
-                          Text(
-                            _weather.city,
-                            style: const TextStyle(
-                              fontSize: 36.0,
-                              letterSpacing: 2.0,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-
-                          const SizedBox(height: 30),
-                          // Temperature
-                          Text("A l'instant"),
-                          Text(
-                            '${_weather.temperature.round()}°C',
-                            style: const TextStyle(
-                              fontSize: 30.0,
-                              fontWeight: FontWeight.w800,
-                            ),
-                          ),
-                          Image.asset(
-                            conditionIcons[_weather.code] ??
-                                'assets/default_icon.png',
-                          ),
-                          const SizedBox(height: 2),
-                          // // Weather condition
-                          Text(
-                            _weather.conditionText,
-                            style: const TextStyle(
-                                fontSize: 18.0, fontWeight: FontWeight.w400),
-                          ),
-                          const SizedBox(
-                            height: 30,
-                          )
-                        ],
-                      ),
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+              child: Column(
+                children: [
+                  Center(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const Text(
-                          "Previsions horaires",
-                          style: TextStyle(
+                        Padding(
+                          padding:
+                              const EdgeInsets.only(top: 50.0, bottom: 20.0),
+                          child: Stack(
+                            children: [
+                              const Align(
+                                child: Text(
+                                  "uWeather",
+                                  style: TextStyle(
+                                      fontSize: 20.0,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 2.0),
+                                ),
+                              ),
+                              Positioned(
+                                right: 20,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      // Toggle between moon and sun icon
+                                      isMoonIcon = !isMoonIcon;
+                                      _currentThemeMode =
+                                          brightness == Brightness.light
+                                              ? ThemeMode.dark
+                                              : ThemeMode.light;
+                                      widget.onThemeModeChanged(
+                                          _currentThemeMode);
+                                    });
+                                  },
+                                  child: AnimatedSwitcher(
+                                    duration: const Duration(
+                                        milliseconds:
+                                            300), // Adjust duration as needed
+                                    child: isMoonIcon
+                                        ? SvgPicture.asset(
+                                            "assets/moon.svg",
+                                            key: const ValueKey(
+                                                'moon'), // Use ValueKey for the moon icon
+                                            height: 30.0,
+                                            width: 30.0,
+                                          )
+                                        : SvgPicture.asset(
+                                            "assets/sun.svg",
+                                            key: const ValueKey(
+                                                'sun'), // Use ValueKey for the sun icon
+                                            height: 30.0,
+                                            width: 30.0,
+                                            colorFilter:const ColorFilter.mode(
+                                                Color.fromARGB(255, 255, 255, 255), BlendMode.srcIn),
+                                          ),
+                                    // Apply a fade transition
+                                    transitionBuilder: (Widget child,
+                                        Animation<double> animation) {
+                                      return FadeTransition(
+                                        opacity: animation,
+                                        child: child,
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 30),
+                        // City name
+                        Text(
+                          _weather.city,
+                          style: const TextStyle(
+                            fontSize: 36.0,
+                            letterSpacing: 2.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 30),
+                        // Temperature
+                        const Text("A l'instant"),
+                        Text(
+                          '${_weather.temperature.round()}°C',
+                          style: const TextStyle(
+                            fontSize: 30.0,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        Image.asset(
+                          conditionIcons[_weather.code] ??
+                              'assets/default_icon.png',
+                        ),
+                        const SizedBox(height: 2),
+                        // // Weather condition
+                        Text(
+                          _weather.conditionText,
+                          style: const TextStyle(
                               fontSize: 18.0, fontWeight: FontWeight.w400),
                         ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        HourlyForecastList(
-                            hourlyForecasts: _weather.hourlyForecasts,
-                            conditionIcons: conditionIcons),
                         const SizedBox(
                           height: 30,
-                        ),
-                        const Text(
-                          "Previsions journalieres",
-                          style: TextStyle(
-                              fontSize: 18.0, fontWeight: FontWeight.w400),
-                        ),
-                        DailyForecastList(
-                          dailyForecasts: _weather.dailyForecasts,
-                          conditionIcons: conditionIcons,
-                        ),
+                        )
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const Text(
+                        "Previsions horaires",
+                        style: TextStyle(
+                            fontSize: 18.0, fontWeight: FontWeight.w400),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      HourlyForecastList(
+                          hourlyForecasts: _weather.hourlyForecasts,
+                          conditionIcons: conditionIcons),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      const Text(
+                        "Previsions journalieres",
+                        style: TextStyle(
+                            fontSize: 18.0, fontWeight: FontWeight.w400),
+                      ),
+                      DailyForecastList(
+                        dailyForecasts: _weather.dailyForecasts,
+                        conditionIcons: conditionIcons,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           );

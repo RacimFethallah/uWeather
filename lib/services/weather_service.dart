@@ -23,6 +23,7 @@ class WeatherService {
       if (apiKey == null || apiKey!.isEmpty) {
         throw Exception("API key not found in environment variables");
       }
+      
       final response =
           await http.get(Uri.parse('$baseUrl?key=$apiKey&q=$lat,$lon&days=5&aqi=no&alerts=no'));
       if (response.statusCode == 200) {

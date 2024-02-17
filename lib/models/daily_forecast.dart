@@ -13,6 +13,16 @@ class DailyForecastList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    Color boxColor;
+
+    if (theme.brightness == Brightness.light) {
+      // Use a lighter color when the theme is light
+      boxColor = Colors.white; // You can adjust this color as needed
+    } else {
+      // Use a darker color when the theme is dark
+      boxColor = const Color.fromARGB(255, 10, 15, 32); // You can adjust this color as needed
+    }
     return SizedBox(
       height: 400, // Adjust the height as needed
       child: SingleChildScrollView(
@@ -24,7 +34,7 @@ class DailyForecastList extends StatelessWidget {
                   const EdgeInsets.only(left: 10.0, right: 10.0, bottom: 5),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 234, 234, 234),
+                  color:boxColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: const [
                     BoxShadow(

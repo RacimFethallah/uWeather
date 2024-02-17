@@ -9,19 +9,42 @@ void main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _currentThemeMode = ThemeMode.system;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      themeMode: _currentThemeMode,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 5, 33, 6)),
-        useMaterial3: true,
+        brightness: Brightness.light,
+        primaryColor: const Color.fromARGB(255, 255, 251, 235),
+      ),
+      darkTheme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor:const Color.fromARGB(255, 17, 28, 57),
       ),
       debugShowCheckedModeBanner: false,
-      home: const WeatherPage(),
+      home: WeatherPage(
+        onThemeModeChanged: (themeMode) {
+          setState(() {
+            _currentThemeMode = themeMode;
+          });
+        },
+      ),
     );
   }
 }
+
+
+// theme: ThemeData(
+//         colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 255, 251, 235)),
+//         useMaterial3: true,
+//       ),

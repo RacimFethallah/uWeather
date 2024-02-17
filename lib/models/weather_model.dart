@@ -26,7 +26,6 @@
 //   }
 // }
 
-
 class Weather {
   final String city;
   // final double latitude;
@@ -48,17 +47,36 @@ class Weather {
       required this.dailyForecasts});
 
   factory Weather.fromJson(Map<String, dynamic> json) {
+    final now = DateTime.now();
+    final currentDay = now.day;
+    final currentHour = now.hour;
+
+    // Extract hourly data directly in a single step
+    final hourlyData = (json['forecast']['forecastday'] as List)
+        .expand((day) => day['hour'] as List)
+        .toList();
+
+    final hourlyForecasts = hourlyData
+        .where((forecast) {
+          final forecastDateTime = DateTime.parse(forecast['time']);
+          final forecastDay = forecastDateTime.day;
+          final forecastHour = forecastDateTime.hour;
+
+          return (forecastDay == currentDay && forecastHour >= currentHour) ||
+              (forecastDay == currentDay + 1 && forecastHour <= currentHour);
+        })
+        .map((forecast) => HourlyForecast.fromJson(forecast))
+        .toList();
+
     return Weather(
       city: '',
       // latitude: json['coord'] != null ? (json['coord']['lat'] as num).toDouble() : 0.0,
       // longitude: json['coord'] != null ? (json['coord']['lon'] as num).toDouble() : 0.0,
       temperature: (json['current']['temp_c'] as num).toDouble(),
-      conditionText:(json['current']['condition']['text'] as String),
+      conditionText: (json['current']['condition']['text'] as String),
       code: (json['current']['condition']['code'] as num).toInt(),
       // Parse HourlyForecast list if needed
-      hourlyForecasts: (json['forecast']['forecastday'][0]['hour'] as List)
-          .map((forecast) => HourlyForecast.fromJson(forecast))
-          .toList(),
+      hourlyForecasts: hourlyForecasts,
       // Parse DailyForecast list if needed
       dailyForecasts: (json['forecast']['forecastday'] as List)
           .map((forecast) => DailyForecast.fromJson(forecast))
@@ -92,7 +110,6 @@ class HourlyForecast {
     );
   }
 }
-
 
 class DailyForecast {
   final String date;
