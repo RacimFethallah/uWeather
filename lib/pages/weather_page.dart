@@ -85,7 +85,8 @@ class _WeatherPageState extends State<WeatherPage> {
             body: SingleChildScrollView(
               child: Container(
                 // width: double.infinity,
-                color: const Color.fromARGB(255, 247, 250, 252),
+                color: const Color.fromARGB(255, 255, 251, 235),
+                // color: const Color(0x00FBBAA1),
                 child: Column(
                   children: [
                     Center(
