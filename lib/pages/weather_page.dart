@@ -170,6 +170,9 @@ class _WeatherPageState extends State<WeatherPage> {
                         HourlyForecastList(
                             hourlyForecasts: _weather.hourlyForecasts,
                             conditionIcons: conditionIcons),
+                        const SizedBox(
+                          height: 30,
+                        ),
                         const Text(
                           "Previsions journalieres",
                           style: TextStyle(

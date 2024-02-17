@@ -46,7 +46,7 @@ class HourlyForecastList extends StatelessWidget {
                           'assets/default_icon.png',
                     ),
                     Text('${forecast.temperature.round()}°C'),
-                    Text(forecast.chanceOfRain.toString(), style: TextStyle(color: Colors.blue[900], fontWeight: FontWeight.bold)),
+                    Text('${forecast.chanceOfRain.toInt().toString()}%', style: TextStyle(color: Colors.blue[900], fontWeight: FontWeight.bold)),
                   ],
                 ),
               );
