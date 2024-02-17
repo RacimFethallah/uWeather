@@ -63,7 +63,7 @@ class Weather {
           final forecastHour = forecastDateTime.hour;
 
           return (forecastDay == currentDay && forecastHour >= currentHour) ||
-              (forecastDay == currentDay + 1 && forecastHour <= currentHour);
+              (forecastDay == currentDay + 1 && forecastHour < currentHour);
         })
         .map((forecast) => HourlyForecast.fromJson(forecast))
         .toList();

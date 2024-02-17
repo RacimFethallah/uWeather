@@ -45,9 +45,11 @@ class HourlyForecastList extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
               final forecast = hourlyForecasts[index];
+              print(DateTime.parse(forecast.time));
+              print(DateTime.now());
               String formattedTime =
                   (DateTime.parse(forecast.time).hour == DateTime.now().hour)
-                      ? 'Now'
+                      ? 'Now' 
                       : '${DateTime.parse(forecast.time).hour}:00';
 
               return Padding(

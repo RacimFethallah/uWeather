@@ -72,7 +72,7 @@ class _WeatherPageState extends State<WeatherPage> {
      
     final ThemeData theme = Theme.of(context);
     Brightness brightness = theme.brightness;
-    bool isMoonIcon = brightness == Brightness.dark ? true : false;
+    bool isMoonIcon = brightness == Brightness.dark ? false : true;
     return FutureBuilder<Weather>(
       future: _weatherFuture,
       builder: (context, snapshot) {
