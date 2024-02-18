@@ -1,4 +1,5 @@
 import "package:flutter/material.dart";
+import "package:flutter/services.dart";
 import "package:flutter_svg/flutter_svg.dart";
 import "package:uweather/models/hourly_forecast.dart";
 import "dart:async";
@@ -7,6 +8,7 @@ import '../models/daily_forecast.dart';
 import "../models/weather_descriptions.dart";
 import "../models/weather_model.dart";
 import "../services/weather_service.dart";
+import '../widgets/bottom_drawer.dart';
 import "loadingScreen.dart";
 
 class WeatherPage extends StatefulWidget {
@@ -19,8 +21,9 @@ class WeatherPage extends StatefulWidget {
 }
 
 class _WeatherPageState extends State<WeatherPage> {
- 
-  final _weatherService = WeatherService();
+  String selectedProvider = 'weatherapi';
+  late WeatherService _weatherService; // Change here
+
   late Weather _weather;
   String? weatherDescription;
   late Timer? _weatherTimer;
@@ -30,6 +33,9 @@ class _WeatherPageState extends State<WeatherPage> {
   @override
   void initState() {
     super.initState();
+    _weatherService = WeatherService(
+        selectedProvider:
+            selectedProvider); // Initialize _weatherService with selectedProvider
     _weatherFuture = _fetchWeather();
     _startWeatherTimer();
   }
@@ -69,7 +75,6 @@ class _WeatherPageState extends State<WeatherPage> {
 
   @override
   Widget build(BuildContext context) {
-     
     final ThemeData theme = Theme.of(context);
     Brightness brightness = theme.brightness;
     bool isMoonIcon = brightness == Brightness.dark ? false : true;
@@ -81,14 +86,34 @@ class _WeatherPageState extends State<WeatherPage> {
           return const LoadingScreen();
         } else if (snapshot.hasError) {
           // Handle error state
-          return Center(
-            child: Text(
-              'Error: ${snapshot.error}',
-              style: const TextStyle(color: Colors.red),
+          return AlertDialog(
+            title: const Text('No internet connection'),
+            content: const Text(
+              'Oops! Looks like you\'re offline. Please check your internet connection and try again.',
+              textAlign: TextAlign.center,
             ),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Close'),
+                onPressed: () {
+                  final defaultWeather = Weather(
+                    city: "",
+                    temperature: 0.0,
+                    conditionText: "",
+                    code: 0,
+                    hourlyForecasts: [],
+                    dailyForecasts: [],
+                  );
+                  setState(() {
+                    _weather = defaultWeather;
+                    _weatherFuture = Future.value(defaultWeather);
+                  });
+                  // Navigator.of(context).pop();
+                },
+              ),
+            ],
           );
         } else {
-          
           // Otherwise, show the WeatherPage
           return Scaffold(
             backgroundColor: theme.primaryColor,
@@ -108,6 +133,33 @@ class _WeatherPageState extends State<WeatherPage> {
                                 const EdgeInsets.only(top: 50.0, bottom: 20.0),
                             child: Stack(
                               children: [
+                                Positioned(
+                                    left: 20,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        showModalBottomSheet(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return BottomDrawer(
+                                              selectedProvider:
+                                                  selectedProvider,
+                                              onProviderChanged: (value) async {
+                                                setState(() {
+                                                  selectedProvider = value;
+                                                });
+                                                Navigator.pop(context);
+                                                await _fetchWeather();
+                                              },
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: SvgPicture.asset(
+                                        "assets/settings.svg",
+                                        height: 30.0,
+                                        width: 30.0,
+                                      ),
+                                    )),
                                 const Align(
                                   child: Text(
                                     "uWeather",
@@ -213,8 +265,8 @@ class _WeatherPageState extends State<WeatherPage> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const Padding(
-                          padding:  EdgeInsets.only(left: 12.0),
-                          child:  Text(
+                          padding: EdgeInsets.only(left: 12.0),
+                          child: Text(
                             "Previsions horaires",
                             style: TextStyle(
                                 fontSize: 18.0, fontWeight: FontWeight.w800),
@@ -230,8 +282,8 @@ class _WeatherPageState extends State<WeatherPage> {
                           height: 30,
                         ),
                         const Padding(
-                          padding:  EdgeInsets.only(left: 8.0),
-                          child:  Text(
+                          padding: EdgeInsets.only(left: 8.0),
+                          child: Text(
                             "Previsions journalieres",
                             style: TextStyle(
                                 fontSize: 18.0, fontWeight: FontWeight.w800),

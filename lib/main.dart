@@ -42,9 +42,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
-
-// theme: ThemeData(
-//         colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 255, 251, 235)),
-//         useMaterial3: true,
-//       ),

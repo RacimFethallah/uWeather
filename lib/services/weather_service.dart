@@ -11,10 +11,11 @@ class WeatherService {
   // static const baseUrl = 'https://api.openweathermap.org/data/2.5/weather';
   static const baseUrl = 'http://api.weatherapi.com/v1/forecast.json';
   static const baseUrlHourly = 'https://api.tomorrow.io/v4/timelines';
+  final String selectedProvider;
 
-  final String? apiKey = dotenv.env['WEATHER_API'];
+  final String? apiKey;
 
-  WeatherService();
+  WeatherService({required this.selectedProvider}) : apiKey = dotenv.env[selectedProvider];
 
   //method to get weather
   Future<Weather> getWeather(double lat, double lon) async {
@@ -67,11 +68,6 @@ class WeatherService {
     }
   }
 
-  // String? getWeatherDescription(int weatherCode) {
-  //   return weatherDescriptions.containsKey(weatherCode)
-  //       ? weatherDescriptions[weatherCode]
-  //       : "Unknown";
-  // }
 
   //method to get current city
   Future<Map<String, dynamic>> getCurrentCity() async {
